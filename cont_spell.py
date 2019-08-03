@@ -5,22 +5,48 @@ import numpy as np
 import pandas as pd
 import obj_pickle_save_load
 
-class LCSObject:
-    """ Class object to store some information of a template:
+class SpellTemplateClust:
+    """ Class object to store information of a template:
     """
-    def __init__(self, log_template: str, template_id: int, log_id_lt: list):
+    def __init__(self, log_template: list, template_id: int, log_id_lt: list=[]):
         """
         Initialize the template object:
-            1. log_template(str): the template
-            2. template_id(int): the ID of this template
-            3. log_id_lt(list): a group with the same template
+
+        Args:
+            log_template(list): the template
+            template_id(int): the ID of this template
+            log_id_lt(list): a group with the same template
         """
         self.log_template = log_template
         self.template_id = template_id
         self.log_id_lt = log_id_lt
         
 
+class SpellParserInfo:
+    def __init__(self, tau, template_clust_lt: list=[]):
+        self.tau = tau
+        self.template_clust_lt = []
 
+    def load_parser_info(self, file_name):
+        sl_obj = obj_pickle_save_load.ObjPickleSaveLoad(file_name=file_name, obj_type=SpellParserInfo)
+        loaded_obj = sl_obj.obj_load()
+        if loaded_obj:
+            self.tau = loaded_obj.tau
+            self.template_clust_lt = loaded_obj.template_clust_lt
+            return True
+        return False
+
+    def save_parser_info(self, file_name):
+        new_parser_obj = SpellParserInfo(tau=self.tau)
+        for clust in self.template_clust_lt:
+            new_clust = SpellTemplateClust(log_template=clust.log_template, template_id=clust.template_id)
+            new_parser_obj.template_clust_lt.append(new_clust)
+
+        sl_obj = obj_pickle_save_load.ObjPickleSaveLoad(file_name=file_name, obj_type=SpellParserInfo)
+        return sl_obj.obj_save(new_parser_obj)
+
+
+'''
 class ContSpell:
     """ LogParser class
 
@@ -80,3 +106,29 @@ class ContSpell:
                 idx1 -= 1
                 idx2 -= 1
         return result
+
+
+    def lcs_match(self, template_clust_lt: list, new_seq: list):
+        retLogClust = None
+
+        maxLen = -1
+        maxlcs = []
+        maxClust = None
+        set_seq = set(seq)
+        size_seq = len(seq)
+        for logClust in logClustL:
+            set_template = set(logClust.logTemplate)
+            if len(set_seq & set_template) < 0.5 * size_seq:
+                continue
+            lcs = self.LCS(seq, logClust.logTemplate)
+            if len(lcs) > maxLen or (len(lcs) == maxLen and len(logClust.logTemplate) < len(maxClust.logTemplate)):
+                maxLen = len(lcs)
+                maxlcs = lcs
+                maxClust = logClust
+
+        # LCS should be large then tau * len(itself)
+        if float(maxLen) >= self.tau * size_seq:
+            retLogClust = maxClust
+
+        return retLogClust   
+'''
