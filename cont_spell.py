@@ -23,7 +23,11 @@ class SpellTemplateClust:
         
 
 class SpellParserInfo:
-    def __init__(self, tau, template_clust_lt: list=[]):
+    """
+    inofrmation of a Spell-Parser
+    """
+
+    def __init__(self, tau: float, template_clust_lt: list=[]):
         self.tau = tau
         self.template_clust_lt = []
 
@@ -46,7 +50,7 @@ class SpellParserInfo:
         return sl_obj.obj_save(new_parser_obj)
 
 
-'''
+
 class ContSpell:
     """ LogParser class
 
@@ -108,27 +112,25 @@ class ContSpell:
         return result
 
 
-    def lcs_match(self, template_clust_lt: list, new_seq: list):
-        retLogClust = None
+    def lcs_match(self, template_clust_lt: list, new_seq: list, tau: float):
+        ret_clust = None
 
-        maxLen = -1
-        maxlcs = []
-        maxClust = None
-        set_seq = set(seq)
-        size_seq = len(seq)
-        for logClust in logClustL:
-            set_template = set(logClust.logTemplate)
-            if len(set_seq & set_template) < 0.5 * size_seq:
+        max_len = -1
+        max_clust = None
+        set_seq = set(new_seq)
+        new_seq_len = len(new_seq)
+        for clust in template_clust_lt:
+            set_template = set(clust.log_template)
+            if len(set_seq & set_template) < tau * new_seq_len:
                 continue
-            lcs = self.LCS(seq, logClust.logTemplate)
-            if len(lcs) > maxLen or (len(lcs) == maxLen and len(logClust.logTemplate) < len(maxClust.logTemplate)):
-                maxLen = len(lcs)
-                maxlcs = lcs
-                maxClust = logClust
+
+            lcs = self.longest_common_subsequence(new_seq, clust.log_template)
+            if len(lcs) > max_len or (len(lcs) == max_len and len(clust.log_template) < len(max_clust.log_template)):
+                max_len = len(lcs)
+                max_clust = clust
 
         # LCS should be large then tau * len(itself)
-        if float(maxLen) >= self.tau * size_seq:
-            retLogClust = maxClust
+        if float(max_len) >= tau * new_seq_len:
+            ret_clust = max_clust
 
-        return retLogClust   
-'''
+        return ret_clust   
