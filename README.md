@@ -1,2 +1,2 @@
-# Instant_SpellParser
+# SpellParser
  
